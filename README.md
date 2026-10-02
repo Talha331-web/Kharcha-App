@@ -1,116 +1,116 @@
 # Kharcha — SMS-based Expense Tracker (Pakistan)
 
-Yeh poora project do parts mein hai:
+This project has two parts:
 - `backend/` — Node.js + Express + MongoDB API
-- `mobile/` — React Native (Expo) app jo Play Store pe jayegi
+- `mobile/` — React Native (Expo) app that will be published on the Play Store
 
-**Approach:** App koi risky SMS permission nahi maangti. User apne bank/wallet ka
-SMS apne aap Messages app se "Share" kare, hamari app usay parse karke transaction
-save kar deti hai (confirm karne ke baad). Ye Google Play policy-safe hai.
+**Approach:** The app does not ask for any risky SMS permission. The user shares their
+bank/wallet SMS themselves from the Messages app using "Share", and our app parses it and
+saves the transaction (after the user confirms). This is compliant with Google Play policy.
 
 ---
 
-## Part 1: Backend Setup (khud ke computer pe)
+## Part 1: Backend Setup (on your own computer)
 
-1. Node.js install karein (v18 ya usse upar): https://nodejs.org
-2. Free MongoDB database banayein: https://www.mongodb.com/cloud/atlas (free tier kaafi hai)
-   - Cluster banayein, "Connect" → "Connect your application" se connection string copy karein
-3. Terminal mein:
+1. Install Node.js (v18 or above): https://nodejs.org
+2. Create a free MongoDB database: https://www.mongodb.com/cloud/atlas (the free tier is enough)
+   - Create a cluster, then copy the connection string from "Connect" → "Connect your application"
+3. In the terminal:
    ```bash
    cd backend
    npm install
    cp .env.example .env
    ```
-4. `.env` file open karke apna `MONGO_URI` paste karein aur `JWT_SECRET` mein koi bhi
-   random lambi string daal dein (jaise `kharcha_super_secret_2026_xyz`)
-5. Local test ke liye:
+4. Open the `.env` file and paste your `MONGO_URI`, and put any long random string in
+   `JWT_SECRET` (for example `kharcha_super_secret_2026_xyz`)
+5. To test locally:
    ```bash
    npm run dev
    ```
-   Browser mein `http://localhost:5000` khol kar dekhein — `{"status":"Kharcha API running"}` dikhna chahiye.
+   Open `http://localhost:5000` in your browser — you should see `{"status":"Kharcha API running"}`.
 
-### Backend ko internet pe deploy karna (zaroori hai — phone se localhost accessible nahi hoga)
+### Deploying the backend to the internet (required — localhost is not reachable from your phone)
 
 Free options:
-- **Render.com** (recommended, free tier): GitHub pe code push karein, Render pe "New Web Service"
-  banayein, repo connect karein, environment variables (`MONGO_URI`, `JWT_SECRET`) daal dein, deploy karein.
+- **Render.com** (recommended, free tier): Push your code to GitHub, create a "New Web Service"
+  on Render, connect your repo, add the environment variables (`MONGO_URI`, `JWT_SECRET`), and deploy.
 - **Railway.app** — similar process.
 
-Deploy hone ke baad aapko ek URL milega jaise `https://kharcha-api.onrender.com`.
+After deployment you will get a URL like `https://kharcha-api.onrender.com`.
 
 ---
 
 ## Part 2: Mobile App Setup
 
-1. `mobile/services/api.js` file kholein, `BASE_URL` ko apne deployed backend URL se replace karein:
+1. Open the `mobile/services/api.js` file and replace `BASE_URL` with your deployed backend URL:
    ```js
    export const BASE_URL = "https://kharcha-api.onrender.com/api";
    ```
-2. Terminal mein:
+2. In the terminal:
    ```bash
    cd mobile
    npm install
    ```
-3. Expo account banayein (free): https://expo.dev/signup
-4. EAS CLI install karein:
+3. Create an Expo account (free): https://expo.dev/signup
+4. Install the EAS CLI:
    ```bash
    npm install -g eas-cli
    eas login
    ```
 
-### Testing karna (development build zaroori hai)
+### Testing (a development build is required)
 
-**Important:** `expo-share-intent` (jo Share feature ke liye chahiye) Expo Go app mein
-kaam nahi karta — isay test karne ke liye "development build" banani padegi:
+**Important:** `expo-share-intent` (needed for the Share feature) does not work in the
+Expo Go app — to test it you will need to create a "development build":
 
 ```bash
 eas build --profile development --platform android
 ```
 
-Ye cloud pe build hoga (aapke computer pe Android Studio install karne ki zaroorat
-nahi), aur ek `.apk` link milega jo aap apne phone pe install karke test kar sakte hain.
+This builds in the cloud (you don't need to install Android Studio on your computer), and
+you will get an `.apk` link that you can install on your phone to test.
 
 ---
 
-## Part 3: Play Store ke liye Production Build
+## Part 3: Production Build for the Play Store
 
-1. `mobile/app.json` mein `android.package` ko unique rakhein (jaise `com.talha.kharcha`) —
-   ye ek baar set hone ke baad badla nahi ja sakta.
-2. App icon aur splash screen `mobile/assets/` folder mein daalein (1024x1024 icon.png,
-   adaptive-icon.png waghera — Expo docs follow karein: https://docs.expo.dev/develop/user-interface/app-icons/)
-3. Production build banayein:
+1. Keep `android.package` in `mobile/app.json` unique (for example `com.talha.kharcha`) —
+   once it is set, it cannot be changed.
+2. Add the app icon and splash screen to the `mobile/assets/` folder (a 1024x1024 icon.png,
+   adaptive-icon.png, etc. — follow the Expo docs: https://docs.expo.dev/develop/user-interface/app-icons/)
+3. Create the production build:
    ```bash
    eas build --profile production --platform android
    ```
-4. Ye ek `.aab` file dega (Android App Bundle) — yehi file Play Store pe upload hoti hai.
+4. This gives you an `.aab` file (Android App Bundle) — this is the file that gets uploaded to the Play Store.
 
 ---
 
-## Part 4: Google Play Console pe Upload
+## Part 4: Uploading to Google Play Console
 
-1. Google Play Console account banayein: https://play.google.com/console (one-time $25 fee)
-2. "Create app" → naam, category (Finance), free/paid select karein
-3. **Privacy Policy zaroori hai** kyunki app financial data handle karti hai —
-   ek simple privacy policy page bana kar (Google "free privacy policy generator" se) uska
-   URL Play Console mein daalein
-4. Store listing complete karein: screenshots (phone se le sakte hain), short description,
+1. Create a Google Play Console account: https://play.google.com/console (one-time $25 fee)
+2. Click "Create app" → choose a name, category (Finance), and free/paid
+3. **A Privacy Policy is required** because the app handles financial data —
+   create a simple privacy policy page (search Google for "free privacy policy generator") and
+   enter its URL in Play Console
+4. Complete the store listing: screenshots (you can take them from your phone), short description,
    full description, feature graphic
-5. Content rating questionnaire fill karein
-6. Data Safety section mein batayein ke app kaunsa data collect karti hai (email, financial
-   transactions) aur kyun
-7. `.aab` file "Production" ya pehle "Internal Testing" track mein upload karein
-   (Internal Testing se pehle khud aur dost test kar sakte hain launch se pehle)
-8. Submit for review — Google ka review 1-7 din leta hai
+5. Fill out the content rating questionnaire
+6. In the Data Safety section, state what data the app collects (email, financial
+   transactions) and why
+7. Upload the `.aab` file to the "Production" track, or to "Internal Testing" first
+   (with Internal Testing, you and your friends can test before launch)
+8. Submit for review — Google's review takes 1-7 days
 
 ---
 
-## Achi Reviews/Downloads ke liye reminders
+## Reminders for Good Reviews/Downloads
 
-- Pehle "Internal Testing" track pe apne 5-10 dost/classmates se test karwayein, bugs fix karein
-- Onboarding smooth rakhein — sign up ke foran baad "Share ek SMS karke dekhein" wala demo dikhayein
-- Play Store listing mein clearly likhein ke app SMS "read" nahi karti, sirf jo aap manually
-  share karte hain wahi process hoti hai — ye trust banata hai
-- 7 din consistent use ke baad in-app review prompt dikhayein (random time pe mat mangein)
+- First, have 5-10 friends/classmates test on the "Internal Testing" track, and fix the bugs
+- Keep onboarding smooth — right after sign-up, show a "Try sharing an SMS" demo
+- Clearly state in the Play Store listing that the app does not "read" SMS — it only processes
+  what you manually share, which builds trust
+- Show the in-app review prompt after 7 days of consistent use (don't ask at a random time)
 
 ---
 
@@ -132,9 +132,9 @@ kharcha-app/
     └── App.js                    ← Navigation setup
 ```
 
-## Future improvements (jab MVP chal jaye)
+## Future Improvements (once the MVP is running)
 
-- `utils/smsParser.js` mein aur bank SMS formats add karein jaise real samples milein
-- Categorization ko AI API (Claude/GPT) se upgrade karein better accuracy ke liye
+- Add more bank SMS formats to `utils/smsParser.js` as real samples become available
+- Upgrade categorization with an AI API (Claude/GPT) for better accuracy
 - Monthly budget alerts (push notifications)
-- Charts/graphs add karein (react-native-chart-kit se)
+- Add charts/graphs (using react-native-chart-kit)
